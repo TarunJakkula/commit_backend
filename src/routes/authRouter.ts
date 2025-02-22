@@ -2,6 +2,8 @@ import { Router } from "express";
 import { body } from "express-validator";
 import loginController from "../controllers/authControllers/loginController.ts";
 import registerController from "../controllers/authControllers/registerController.ts";
+import forgotpasswordController from "../controllers/authControllers/forgotpasswordController.ts";
+import resetpasswordController from "../controllers/authControllers/resetpasswordController.ts";
 
 // router to handle auth
 const router = Router();
@@ -22,8 +24,15 @@ router.post(
 	checkEmail(),
 	checkPasswordLength(),
 	checkNonEmpty("f_name"),
-	checkNonEmpty("l_name"),
 	registerController,
+);
+router.post("/forgotpassword", checkEmail(), forgotpasswordController);
+router.patch(
+	"/resetpassword",
+	body("_id").trim().notEmpty(),
+	checkPasswordLength(),
+	body("code").trim().notEmpty().isLength({ min: 6, max: 6 }),
+	resetpasswordController,
 );
 
 export default router;

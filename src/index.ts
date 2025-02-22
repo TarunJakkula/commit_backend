@@ -1,6 +1,6 @@
 import express, { Request, Response } from "express";
 import dotenv from "dotenv";
-
+import process from "node:process";
 import userRoutes from "../src/routes/authRouter.ts";
 import errorHandler from "./middleware/errorHandler.ts";
 
