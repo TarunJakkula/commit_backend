@@ -2,7 +2,6 @@ import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import pool from "../../db.ts";
 import bcrypt from "bcrypt";
-import { clear } from "node:console";
 
 const resetpasswordController = async (req: Request, res: Response) => {
 	const result = validationResult(req);
@@ -10,11 +9,11 @@ const resetpasswordController = async (req: Request, res: Response) => {
 		res.status(422).json({ error: result.array() });
 		return;
 	}
-	const { code, password, _id } = req.body;
+	const { code, password, email } = req.body;
 	try {
 		const user = await pool.query(
-			`SELECT _id FROM users WHERE _id = $1`,
-			[_id],
+			`SELECT _id FROM users WHERE email = $1`,
+			[email],
 		);
 		if (user.rowCount === 0) {
 			res.status(403).json({
@@ -24,7 +23,7 @@ const resetpasswordController = async (req: Request, res: Response) => {
 		}
 		const codes = await pool.query(
 			"SELECT code,expires_at from reset_codes WHERE user_id = $1",
-			[_id],
+			[user.rows[0]._id],
 		);
 		if (codes.rowCount === 0) {
 			res.status(404).json({
@@ -43,12 +42,12 @@ const resetpasswordController = async (req: Request, res: Response) => {
 		const hashed_password = await bcrypt.hash(password, salt);
 		await pool.query(
 			`UPDATE users SET password = $1 WHERE _id = $2`,
-			[hashed_password, _id],
+			[hashed_password, user.rows[0]._id],
 		);
 		try {
 			await pool.query(
 				"DELETE from reset_codes WHERE user_id = $1",
-				[_id],
+				[user.rows[0]._id],
 			);
 		} catch (e) {
 			console.error(e);

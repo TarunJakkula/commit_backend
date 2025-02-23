@@ -43,7 +43,10 @@ const forgotpasswordController = async (req: Request, res: Response) => {
 			[user.rows[0]._id, code, expiryTime],
 		);
 		await transporter.sendMail(mailOptions);
-		res.send({ _id: user.rows[0]._id, message: "Reset code sent" });
+		res.send({
+			email,
+			message: "Reset code sent",
+		});
 	} catch (e) {
 		console.error(e);
 		res.status(500).json({ error: "Internal server error" });

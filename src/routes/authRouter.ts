@@ -29,7 +29,7 @@ router.post(
 router.post("/forgotpassword", checkEmail(), forgotpasswordController);
 router.patch(
 	"/resetpassword",
-	body("_id").trim().notEmpty(),
+	checkEmail(),
 	checkPasswordLength(),
 	body("code").trim().notEmpty().isLength({ min: 6, max: 6 }),
 	resetpasswordController,
