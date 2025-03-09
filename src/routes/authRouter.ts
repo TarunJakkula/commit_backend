@@ -28,7 +28,7 @@ router.post(
 );
 router.post("/forgotpassword", checkEmail(), forgotpasswordController);
 router.patch(
-	"/resetpassword",
+	"/forgotpassword",
 	checkEmail(),
 	checkPasswordLength(),
 	body("code").trim().notEmpty().isLength({ min: 6, max: 6 }),
