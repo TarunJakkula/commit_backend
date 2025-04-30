@@ -1,12 +1,12 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import pool from "../../db.ts";
+import pool from "../../db";
 import bcrypt from "bcrypt";
 
 const resetpasswordController = async (req: Request, res: Response) => {
   const result = validationResult(req);
   if (!result.isEmpty()) {
-    res.status(422).json({ error: result.array() });
+    res.status(422).json({ validation_errors: result.array() });
     return;
   }
   const { code, password, email } = req.body;
@@ -22,7 +22,7 @@ const resetpasswordController = async (req: Request, res: Response) => {
     }
     const codes = await pool.query(
       "SELECT code,expires_at from reset_codes WHERE user_id = $1",
-      [user.rows[0]._id],
+      [user.rows[0]._id]
     );
     if (codes.rowCount === 0) {
       res.status(404).json({

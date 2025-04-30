@@ -1,10 +1,11 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import updatenameController from "../controllers/profileController/updatenameController.ts";
+import updatenameController from "../controllers/profileController/updatenameController";
 import {
   sendVerificationEmail,
   verifyEmail,
-} from "../controllers/profileController/verfiyemailController.ts";
+} from "../controllers/profileController/verfiyemailController";
+import updatepasswordController from "../controllers/profileController/updatepasswordController";
 
 // router to handle profile
 const router = Router();
@@ -17,22 +18,22 @@ router.patch(
   "/updatename",
   checkNonEmpty("_id"),
   checkNonEmpty("f_name"),
-  updatenameController,
+  updatenameController
 );
-router.get("/verifyemail", checkNonEmpty("_id"), sendVerificationEmail);
-router.post(
+router.post("/verifyemail", checkNonEmpty("_id"), sendVerificationEmail);
+router.patch(
   "/verifyemail",
   checkNonEmpty("_id"),
   body("code").trim().notEmpty().isLength({ min: 6, max: 6 }),
-  verifyEmail,
+  verifyEmail
 );
 router.patch(
   "/updatepassword",
   checkNonEmpty("_id"),
   checkPasswordLength("old_password"),
   checkPasswordLength("new_password"),
-  () => {},
+  updatepasswordController
 );
-router.patch("/updateprofilepic", () => {});
+// router.patch("/updateprofilepic", () => {});
 
 export default router;

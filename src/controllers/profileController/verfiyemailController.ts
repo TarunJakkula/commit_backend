@@ -2,15 +2,15 @@ import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import otpGenerator from "otp-generator";
 import process from "node:process";
-import pool from "../../db.ts";
-import transporter from "../../nodemailer.ts";
+import pool from "../../db";
+import transporter from "../../nodemailer";
 
 const EXPIRY_MINS = 15;
 
 const sendVerificationEmail = async (req: Request, res: Response) => {
   const result = validationResult(req);
   if (!result.isEmpty()) {
-    res.status(422).json({ error: result.array() });
+    res.status(422).json({ validation_errors: result.array() });
     return;
   }
   const { _id } = req.body;
@@ -39,7 +39,7 @@ const sendVerificationEmail = async (req: Request, res: Response) => {
     expiryTime.setMinutes(expiryTime.getMinutes() + EXPIRY_MINS);
     await pool.query(
       "Insert into verification_codes(user_id,code,expires_at) values($1,$2,$3)",
-      [_id, code, expiryTime],
+      [_id, code, expiryTime]
     );
     await transporter.sendMail(mailOptions);
     res.send({
@@ -72,7 +72,7 @@ const verifyEmail = async (req: Request, res: Response) => {
     }
     const codes = await pool.query(
       "SELECT code,expires_at from verification_codes WHERE user_id = $1",
-      [user.rows[0]._id],
+      [user.rows[0]._id]
     );
     if (codes.rowCount === 0) {
       res.status(404).json({

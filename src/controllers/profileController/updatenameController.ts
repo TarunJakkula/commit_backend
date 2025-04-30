@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import pool from "../../db.ts";
+import pool from "../../db";
 
 const updatenameController = async (req: Request, res: Response) => {
   const result = validationResult(req);
   if (!result.isEmpty()) {
-    res.status(422).json({ error: result.array() });
+    res.status(422).json({ validation_errors: result.array() });
     return;
   }
   const { _id, f_name, l_name } = req.body;
@@ -21,7 +21,7 @@ const updatenameController = async (req: Request, res: Response) => {
     }
     await pool.query(
       "UPDATE users SET f_name = $1, l_name = $2 WHERE _id = $3",
-      [f_name, l_name, _id],
+      [f_name, l_name, _id]
     );
     res.send({
       message: "Updated successfully",

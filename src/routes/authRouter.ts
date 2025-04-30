@@ -1,9 +1,9 @@
 import { Router } from "express";
 import { body } from "express-validator";
-import loginController from "../controllers/authControllers/loginController.ts";
-import registerController from "../controllers/authControllers/registerController.ts";
-import forgotpasswordController from "../controllers/authControllers/forgotpasswordController.ts";
-import resetpasswordController from "../controllers/authControllers/resetpasswordController.ts";
+import loginController from "../controllers/authControllers/loginController";
+import registerController from "../controllers/authControllers/registerController";
+import forgotpasswordController from "../controllers/authControllers/forgotpasswordController";
+import resetpasswordController from "../controllers/authControllers/resetpasswordController";
 
 // router to handle auth
 const router = Router();
