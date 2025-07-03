@@ -6,23 +6,52 @@ import {
   verifyEmail,
 } from "../controllers/profileController/verfiyemailController";
 import updatepasswordController from "../controllers/profileController/updatepasswordController";
+import updateprofilepicController from "../controllers/profileController/updateprofilepicController";
+import multer from "multer";
+import { folderName } from "../index";
+import authHandler from "../middleware/authHandler";
 
 enum FormState {
-  _id = "User Id",
   f_name = "First Name",
   l_name = "Last Name",
   old_password = "Current Password",
   new_password = "New Password",
 }
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, folderName);
+  },
+  filename: function (req, file, cb) {
+    const uniqueName = Date.now() + "-" + file.originalname;
+    cb(null, uniqueName);
+  },
+});
+
+const upload = multer({
+  storage,
+  fileFilter: (req, file, cb) => {
+    const allowedTypes = ["image/jpeg", "image/png"];
+    if (!allowedTypes.includes(file.mimetype)) {
+      return cb(new Error("Only JPG and PNG are allowed"));
+    }
+    cb(null, true);
+  },
+  limits: {
+    fileSize: 4 * 1024 * 1024, // 4MB
+  },
+});
+
 // router to handle profile
 const router = Router();
+router.use(authHandler);
 
-const checkNonEmpty = (field: "_id" | "f_name" | "l_name") =>
+const checkNonEmpty = (field: "f_name" | "l_name") =>
   body(field)
     .trim()
     .notEmpty()
     .withMessage(`${FormState[field]} must be non-empty`);
+
 const checkPasswordLength = (field: string) =>
   body(field)
     .trim()
@@ -32,15 +61,13 @@ const checkPasswordLength = (field: string) =>
 
 router.patch(
   "/updatename",
-  checkNonEmpty("_id"),
   checkNonEmpty("f_name"),
   checkNonEmpty("l_name"),
   updatenameController
 );
-router.post("/verifyemail", checkNonEmpty("_id"), sendVerificationEmail);
+router.post("/verifyemail", sendVerificationEmail);
 router.patch(
   "/verifyemail",
-  checkNonEmpty("_id"),
   body("code")
     .trim()
     .notEmpty()
@@ -50,11 +77,14 @@ router.patch(
 );
 router.patch(
   "/updatepassword",
-  checkNonEmpty("_id"),
   checkPasswordLength("old_password"),
   checkPasswordLength("new_password"),
   updatepasswordController
 );
-// router.patch("/updateprofilepic", () => {});
+router.put(
+  "/updateprofilepic",
+  upload.single("profile_pic"),
+  updateprofilepicController
+);
 
 export default router;
