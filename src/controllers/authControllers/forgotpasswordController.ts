@@ -1,27 +1,19 @@
 import { Request, Response } from "express";
-import { validationResult } from "express-validator";
 import pool from "../../db";
 import transporter from "../../nodemailer";
-import process from "node:process";
 import otpGenerator from "otp-generator";
+import * as responses from "../../helpers/responses";
+import { EMAIL_USER } from "../../helpers/config";
 
 const EXPIRY_MINS = 5;
 
 const forgotpasswordController = async (req: Request, res: Response) => {
-  const result = validationResult(req);
-  if (!result.isEmpty()) {
-    res.status(422).json({ validation_errors: result.array() });
-    return;
-  }
   const { email } = req.body;
   try {
-    const user = await pool.query(`SELECT _id FROM users WHERE email = $1`, [
-      email,
-    ]);
+    const select_user_query = `SELECT _id FROM users WHERE email = $1`;
+    const user = await pool.query(select_user_query, [email]);
     if (user.rowCount === 0) {
-      res.status(403).json({
-        message: "User doesn't exist",
-      });
+      res.status(403).json(responses.errorResponse("User doesn't exit"));
       return;
     }
     const code = otpGenerator.generate(6, {
@@ -29,29 +21,28 @@ const forgotpasswordController = async (req: Request, res: Response) => {
       specialChars: false,
       lowerCaseAlphabets: false,
     });
+    const expiryTime = new Date();
+    expiryTime.setMinutes(expiryTime.getMinutes() + EXPIRY_MINS);
+    const insert_reset_codes_query = `Insert into reset_codes(user_id,code,expires_at) values($1,$2,$3)`;
+    await pool.query(insert_reset_codes_query, [
+      user.rows[0]._id,
+      code,
+      expiryTime,
+    ]);
     const mailOptions = {
-      from: `${process.env.EMAIL_USER}`,
+      from: `${EMAIL_USER}`,
       to: email,
       subject: "Forgot Password",
       html: `Code : ${code}`,
     };
-    const expiryTime = new Date();
-    expiryTime.setMinutes(expiryTime.getMinutes() + EXPIRY_MINS);
-    await pool.query(
-      "Insert into reset_codes(user_id,code,expires_at) values($1,$2,$3)",
-      [user.rows[0]._id, code, expiryTime]
-    );
     await transporter.sendMail(mailOptions);
     const data = {
       email,
     };
-    res.send({
-      data,
-      message: "Reset code sent",
-    });
-  } catch (e) {
+    res.send(responses.successResponse("Reset code sent", data));
+  } catch (e: any) {
     console.error(e);
-    res.status(500).json({ error: "Internal server error" });
+    res.status(500).json(responses.errorResponse("Internal server error", e));
   }
 };
 
