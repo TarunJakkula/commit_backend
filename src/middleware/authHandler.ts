@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import * as jwt from "jsonwebtoken";
-const JWT_SECRET = process.env.JWT_SECRET;
+import { JWT_SECRET } from "../helpers/config";
 
 const authHandler = (req: Request, res: Response, next: NextFunction) => {
   const authorization = req.headers.authorization;

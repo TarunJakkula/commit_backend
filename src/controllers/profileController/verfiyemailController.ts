@@ -1,9 +1,9 @@
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
 import otpGenerator from "otp-generator";
-import process from "node:process";
 import pool from "../../db";
 import transporter from "../../nodemailer";
+import { EMAIL_USER } from "../../helpers/config";
 
 const EXPIRY_MINS = 15;
 
@@ -30,7 +30,7 @@ const sendVerificationEmail = async (req: Request, res: Response) => {
       lowerCaseAlphabets: false,
     });
     const mailOptions = {
-      from: `${process.env.EMAIL_USER}`,
+      from: `${EMAIL_USER}`,
       to: user.rows[0].email,
       subject: "Verify Email",
       html: `Code : ${code}`,

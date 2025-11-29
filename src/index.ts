@@ -1,16 +1,14 @@
 import express, { Request, Response } from "express";
-import dotenv from "dotenv";
+
 import cors from "cors";
-import process from "node:process";
 import userRoutes from "../src/routes/authRouter";
 import profileRoutes from "../src/routes/profileRouter";
 import homeRoutes from "../src/routes/homeRouter";
 import errorHandler from "./middleware/errorHandler";
 import fs from "fs";
+import { PORT } from "./helpers/config";
 
 const app = express();
-dotenv.config();
-const port = process.env.PORT;
 export const folderName = "uploads";
 
 try {
@@ -29,8 +27,8 @@ try {
     res.send("Hello World!");
   });
 
-  app.listen(port, () => {
-    console.log(`Server is running on port : ${port}`);
+  app.listen(PORT, () => {
+    console.log(`Server is running on port : ${PORT}`);
   });
 } catch (err) {
   console.error("Server failed to start: ", err);
