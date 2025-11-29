@@ -6,7 +6,7 @@ const errorResponse = (message: string, error?: Error) => ({
 
 const successResponse = (message: string, data?: any) => ({
   message: message || "API success",
-  data: data ?? "",
+  data: data ?? null,
 });
 
 export { errorResponse, successResponse };
